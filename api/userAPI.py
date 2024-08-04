@@ -29,14 +29,22 @@ def read():
 #Prikazati korisnika po ID-u
 @userAPI.route('/get/<user_id>', methods=['GET'])
 def get_user(user_id):
+    print(user_id)
+    print(f"Fetching user with ID: {user_id}")
+
     try:
         user = user_Ref.document(user_id).get()
+        print(f"User fetched: {user.to_dict() if user.exists else 'None'}")
         if user.exists:
+            print(f"User data: {user.to_dict()}")
             return jsonify(user.to_dict()), 200
         else:
+            print("User not found")
             return jsonify({"error": "User not found"}), 404
     except Exception as e:
-        return f"An Error Occurred: {e}"
+        print(f"An Error Occurred: {e}")
+        return jsonify({"error" : "Internal Server Error"}), 500
+
     
 #Update korisnika po ID-u
 @userAPI.route('/update/<user_id>', methods=['PUT'])
