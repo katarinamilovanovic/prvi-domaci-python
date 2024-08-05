@@ -1,6 +1,10 @@
 import uuid
-from flask import Blueprint, request, jsonify
+from flask import Flask, Blueprint, request, jsonify
+from flask_cors import CORS
 from firebase_admin import firestore
+
+app = Flask(__name__)
+CORS(app)
 
 db = firestore.client()
 user_Ref = db.collection('user')
