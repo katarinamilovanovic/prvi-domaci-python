@@ -7,8 +7,8 @@ function App() {
   const [newUser, setNewUser] = useState({name: '', age: '', address: '', id: ''});
   const [selectedUser, setSelectedUser] = useState(null);
   const [updateUser, setUpdateUser] = useState({ name: '', age: '', address: '', id: '' });
-
-
+  const [searchId, setSearchId] = useState('');
+  
 
 useEffect(() => {
   fetchUsers();
@@ -39,24 +39,22 @@ const handleCreateUser = async() => {
   }
 };
 
-const handleSelectUser = async (id) => {
-  try {
-    const response = await axios.get(`http://127.0.0.1:5000/user/get/${id}`);
-    setSelectedUser(response.data);
-    setUpdateUser({
-      name: response.data.name,
-      age: response.data.age,
-      address: response.data.address,
-      id: response.data.id
-    });
-  } catch (error) {
-    console.error('Error fetching user:', error);
-  }
+const handleSelectUser = (id) => {
+    const user = users.find(user => user.id === id);
+    if (user){
+      setSelectedUser(user);
+      setUpdateUser({
+        name: user.name,
+        age: user.age,
+        address: user.address,
+        id: user.id,
+      });
+    }
 };
 
-const handleUpdateUser = async (id) => {
+const handleUpdateUser = async () => {
   try {
-    await axios.put(`http://127.0.0.1:5000/user/update/${id}`, {
+    await axios.put(`http://127.0.0.1:5000/user/update/${updateUser.id}`, {
       ...updateUser,
       age: parseInt(updateUser.age),
       id: parseInt(updateUser.id)
@@ -67,6 +65,8 @@ const handleUpdateUser = async (id) => {
     console.error('Error updating user:', error);
   }
 };
+
+
 
 const handleDeleteUser = async (id) => {
   try {
@@ -107,8 +107,10 @@ return (
         value={newUser.id}
         onChange={(e) => setNewUser({ ...newUser, id: e.target.value })}
       />
-      <button onClick={handleCreateUser}>Create</button>
+      <button onClick={handleCreateUser} className='create'>Create</button>
     </div>
+
+    
 
     <div>
       <h2>Users List</h2>
@@ -116,8 +118,10 @@ return (
         {users.map((user) => (
           <li key={user.id}>
             {user.name}, {user.age}, {user.address}
-            <button onClick={() => handleSelectUser(user.id)}>Edit</button>
-            <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
+            <div className='dugmici'>
+            <button onClick={() => handleSelectUser(user.id)} className='edit'>Edit</button>
+            <button onClick={() => handleDeleteUser(user.id)} className='delete'>Delete</button>
+            </div>
           </li>
         ))}
       </ul>
@@ -144,7 +148,7 @@ return (
           value={updateUser.address}
           onChange={(e) => setUpdateUser({ ...updateUser, address: e.target.value })}
         />
-        <button onClick={() => handleUpdateUser(selectedUser.id)}>Update</button>
+        <button onClick={() => handleUpdateUser(selectedUser.id)} className='update'>Update</button>
       </div>
     )}
   </div>

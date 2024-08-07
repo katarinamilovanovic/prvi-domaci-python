@@ -33,18 +33,16 @@ def read():
 #Prikazati korisnika po ID-u
 @userAPI.route('/get/<user_id>', methods=['GET'])
 def get_user(user_id):
-    print(user_id)
-    print(f"Fetching user with ID: {user_id}")
-
     try:
-        user = user_Ref.document(user_id).get()
-        print(f"User fetched: {user.to_dict() if user.exists else 'None'}")
-        if user.exists:
-            print(f"User data: {user.to_dict()}")
-            return jsonify(user.to_dict()), 200
-        else:
-            print("User not found")
-            return jsonify({"error": "User not found"}), 404
+       query = user_Ref.where('id' , '==', int(user_id)).stream()
+       user = None
+       for doc in query:
+            user = doc.to_dict()
+            break
+       if user:
+           return jsonify(user), 200
+       else:
+           return jsonify({'error' : 'User not found'}), 404
     except Exception as e:
         print(f"An Error Occurred: {e}")
         return jsonify({"error" : "Internal Server Error"}), 500
@@ -54,18 +52,36 @@ def get_user(user_id):
 @userAPI.route('/update/<user_id>', methods=['PUT'])
 def update_user(user_id):
     try:
-        user_Ref.document(user_id).update(request.json)
-        return jsonify({"success": True}), 200
+        query = user_Ref.where('id', '==', int(user_id)).stream()
+        user_doc = None
+        for doc in query:
+            user_doc = doc
+            break
+        if user_doc:
+            user_Ref.document(user_doc.id).update(request.json)
+            return jsonify({"success": True}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
     except Exception as e:
-        return f"An Error Occurred: {e}"
+        print(f"An Error Occurred: {e}") 
+        return jsonify({"error" : "Internal Server Error"}), 500
 
 #Obrisati korisnika po ID-u
 @userAPI.route('/delete/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
     try:
-        user_Ref.document(user_id).delete()
-        return jsonify({"success": True}), 200
+        query = user_Ref.where('id', '==', int(user_id)).stream()
+        user_doc = None
+        for doc in query:
+            user_doc = doc
+            break
+        if user_doc:
+            user_Ref.document(user_doc.id).delete()
+            return jsonify({"success": True}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
     except Exception as e:
-        return f"An Error Occurred: {e}"
+        print(f"An Error Occurred: {e}")
+        return jsonify({"error" : "Internal Server Error"}), 500
 
 
